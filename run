@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+
+
+
+# ---------------- IMPORTATIONS ----------------
+
+#system
+import os
+import sys
+
+#sources
+sys.path.append( os.getcwd() )
+from src import qomputer
+from src import grover
+from src import rgba
+
+
+
+
+
+
+# ---------------- DECLARATIONS ----------------
+
+#qonstants
+QBIT_NBR      = 1
+MEASURE_NBR   = 1
+ITERATION_NBR = 1000
+
+
+
+
+
+
+# ---------------- EXECUTION ----------------
+
+#create qomputer
+qc = Qomputer(
+	QBIT_NBR,
+	MEASURE_NBR,
+	ITERATION_NBR
+)
+
+#set logical structure
+qc.circuit.h(0)
+qc.circuit.measure(0,0)
