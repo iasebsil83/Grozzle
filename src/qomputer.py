@@ -2,6 +2,16 @@
 
 
 
+# ---------------- IMPORTATIONS ----------------
+
+#quantum lib
+import qiskit as q
+
+
+
+
+
+
 # ---------------- CLASS ----------------
 class Qomputer:
 

@@ -29,9 +29,9 @@ import sys
 
 #sources
 sys.path.append( os.getcwd() )
-from src import qomputer
-from src import grover
-from src import rgba
+from src.qomputer import *
+from src.grover   import *
+from src.rgba     import *
 
 
 
