@@ -1,6 +1,20 @@
 #!/usr/bin/python3
 
 '''
+
+/--------------------------------------------------------------------------\
+|                               GROZZLE                                    |
+\--------------------------------------------------------------------------/
+|      Grozzle is a puzzle solver using the Grover Algorithm. This has been
+| done using some qbits from a quantum computer (or a simulator) and
+| following a specific circuit.
+|
+| Versions :
+|     18/10/2021 > [0.1.0]
+|     - Started Grozzle
+|
+/--------------------------------------------------------------------------\
+
    LICENCE :
 
     Grozzle
@@ -41,8 +55,7 @@ from src.rgba     import *
 # ---------------- DECLARATIONS ----------------
 
 #qonstants
-QBIT_NBR      = 1
-MEASURE_NBR   = 1
+VALUES_NBR    = 8
 ITERATION_NBR = 1000
 
 
@@ -53,12 +66,20 @@ ITERATION_NBR = 1000
 # ---------------- EXECUTION ----------------
 
 #create qomputer
-qc = Qomputer(
-	QBIT_NBR,
-	MEASURE_NBR,
-	ITERATION_NBR
+qo = Qomputer(
+	VALUES_NBR+1, #qbits
+	VALUES_NBR    #measures
 )
 
-#set logical structure
-qc.circuit.h(0)
-qc.circuit.measure(0,0)
+#set values
+values = []
+for v in range(VALUES_NBR):
+	values.append( 0b0000_0000 )
+current = 0b0000_1000
+
+#set circuit
+qo.circuit = getGroverCircuit(VALUES_NBR)
+qo.showCircuit()
+
+#execute
+print( qo.run(ITERATION_NBR) )
