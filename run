@@ -38,14 +38,17 @@
 # ---------------- IMPORTATIONS ----------------
 
 #system
-import os
-import sys
+import os, sys
 
 #sources
 sys.path.append( os.getcwd() )
 from src.qomputer import *
 from src.grover   import *
+from src.binutils import *
+from src.pieces   import *
 from src.rgba     import *
+from src.window   import *
+from src.startup  import *
 
 
 
@@ -55,8 +58,90 @@ from src.rgba     import *
 # ---------------- DECLARATIONS ----------------
 
 #qonstants
-VALUES_NBR    = 8
 ITERATION_NBR = 1000
+
+#puzzle
+PIECES_NBR = 64
+
+#create new window
+win = Window("Grozzle 0.1.0", 1080,640,'#000000')
+
+
+
+
+
+
+# ---------------- USEFUL ----------------
+
+#oracle
+def regular_oracle(value, patern):
+	v = to16bArray(value)
+	p = to16bArray(patern)
+
+	#print("v : "+str(v)+"\np : "+str(p))
+	#print("1 - v0 or p0 : "+str(v[0] | p[0]))
+	#print("2 - v1 & p1 : "+str(v[1] & p[1]))
+	#print("3 - v2 & p2 : "+str(v[2] & p[2]))
+	#print("4 - v3 & p3 : "+str(v[3] & p[3]))
+	#print("8 - 1 or 5 or 6 or 7 : "+str( (v[ 0] | p[ 0]) or (v[ 1] & p[ 1]) or (v[ 2] & p[ 2]) or (v[ 3] & p[ 3])))
+	print()
+
+	return (
+		    (v[ 0] | p[ 0]) or
+		(v[ 1] & p[ 1]) or
+		(v[ 2] & p[ 2]) or
+		(v[ 3] & p[ 3])
+	) & (
+		    (v[ 4] | p[ 4]) or
+		(v[ 5] & p[ 5]) or
+		(v[ 6] & p[ 6]) or
+		(v[ 7] & p[ 7])
+	) & (
+		    (v[ 8] | p[ 8]) or
+		(v[ 9] & p[ 9]) or
+		(v[10] & p[10]) or
+		(v[11] & p[11])
+	) & (
+		    (v[12] | p[12]) or
+		(v[13] & p[13]) or
+		(v[14] & p[14]) or
+		(v[15] & p[15])
+	)
+
+#value selection
+'''def quantum_select(sides, patern, iteration_nbr):
+
+	#create qomputer
+	qo = Qomputer(
+		VALUES_NBR+1, #qbits
+		VALUES_NBR    #measures
+	)
+
+	#set circuit
+	qo.circuit = getGroverCircuit(values, patern)
+	qo.showCircuit()
+
+	#execute
+	print( qo.run(iteration_nbr) )
+'''
+def regular_select(pieces, patern, iteration_nbr):
+	result = []
+	cnt    = 1
+
+	#for each value
+	for p in pieces:
+		if regular_oracle( p.desc, patern.desc ):
+			result.append(1)
+			cnt += 1
+		else:
+			result.append(0)
+
+	#normalize shots
+	occurrences = int( iteration_nbr/cnt )
+	for r in range(len(result)):
+		result[r] *= occurrences
+
+	return result
 
 
 
@@ -65,21 +150,49 @@ ITERATION_NBR = 1000
 
 # ---------------- EXECUTION ----------------
 
-#create qomputer
-qo = Qomputer(
-	VALUES_NBR+1, #qbits
-	VALUES_NBR    #measures
+#startup
+startup(win)
+win.stop()
+
+
+
+#generate pieces & patern
+pieces = []
+for p in range(PIECES_NBR):
+	pieces.append( Piece() )
+
+patern = Piece(
+	SIDE_INNER,
+	SIDE_OUTER,
+	SIDE_UNDEFINED,
+	SIDE_UNDEFINED
 )
 
-#set values
-values = []
-for v in range(VALUES_NBR):
-	values.append( 0b0000_0000 )
-current = 0b0000_1000
 
-#set circuit
-qo.circuit = getGroverCircuit(VALUES_NBR)
-qo.showCircuit()
 
-#execute
-print( qo.run(ITERATION_NBR) )
+#select descriptions that matches the patern
+selection = regular_select(
+	pieces,
+	patern,
+	ITERATION_NBR
+)
+
+
+
+#display
+print("PIECES : [")
+for p in range(PIECES_NBR):
+	print(str(p)+" : ")
+	pieces[p].print()
+	print(" vs ")
+	patern.print()
+print("]\n")
+
+print("PATERN :")
+patern.print()
+
+print("RESULT : {")
+for s in range(len(selection)):
+	if (selection[s] > 0):
+		print("Piece "+str(printOnNdec(s,3))+" : "+str(printOnNbits(s,6))+" -> "+str(selection[s])+" : "+ printOn16b(pieces[s].desc) + " vs " + printOn16b(patern.desc))
+print("}")
