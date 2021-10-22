@@ -39,16 +39,27 @@
 
 #system
 import os, sys
-
-#sources
+import glob
+import random
 sys.path.append( os.getcwd() )
+
+#tkinter
+from tkinter      import PhotoImage
+
+#sources : utils
+from src.binutils import *
+
+#sources : quantum utils
 from src.qomputer import *
 from src.grover   import *
-from src.binutils import *
-from src.pieces   import *
-from src.rgba     import *
+
+#sources : graphics
 from src.window   import *
 from src.startup  import *
+
+#sources : puzzle
+from src.puzzle   import *
+from src.pieces   import *
 
 
 
@@ -61,10 +72,18 @@ from src.startup  import *
 ITERATION_NBR = 1000
 
 #puzzle
-PIECES_NBR = 64
+all_sprites       = glob.glob( os.getcwd() + '/sprites/_*')
+PUZZLE_IMAGE_PATH = all_sprites[
+	random.randint(0, len(all_sprites)-1 )
+]
+PUZZLE_ROWS       = 8 #64
+PUZZLE_COLUMNS    = 16 #64
 
-#create new window
-win = Window("Grozzle 0.1.0", 1080,640,'#000000')
+#window
+GAME_WIDTH  = 1280
+GAME_HEIGHT = 720
+VERSION     = "0.1.0"
+FRAME_RATE  = 1.0/40
 
 
 
@@ -78,31 +97,23 @@ def regular_oracle(value, patern):
 	v = to16bArray(value)
 	p = to16bArray(patern)
 
-	#print("v : "+str(v)+"\np : "+str(p))
-	#print("1 - v0 or p0 : "+str(v[0] | p[0]))
-	#print("2 - v1 & p1 : "+str(v[1] & p[1]))
-	#print("3 - v2 & p2 : "+str(v[2] & p[2]))
-	#print("4 - v3 & p3 : "+str(v[3] & p[3]))
-	#print("8 - 1 or 5 or 6 or 7 : "+str( (v[ 0] | p[ 0]) or (v[ 1] & p[ 1]) or (v[ 2] & p[ 2]) or (v[ 3] & p[ 3])))
-	print()
-
 	return (
-		    (v[ 0] | p[ 0]) or
+		(v[ 0] | p[ 0]) or
 		(v[ 1] & p[ 1]) or
 		(v[ 2] & p[ 2]) or
 		(v[ 3] & p[ 3])
 	) & (
-		    (v[ 4] | p[ 4]) or
+		(v[ 4] | p[ 4]) or
 		(v[ 5] & p[ 5]) or
 		(v[ 6] & p[ 6]) or
 		(v[ 7] & p[ 7])
 	) & (
-		    (v[ 8] | p[ 8]) or
+		(v[ 8] | p[ 8]) or
 		(v[ 9] & p[ 9]) or
 		(v[10] & p[10]) or
 		(v[11] & p[11])
 	) & (
-		    (v[12] | p[12]) or
+		(v[12] | p[12]) or
 		(v[13] & p[13]) or
 		(v[14] & p[14]) or
 		(v[15] & p[15])
@@ -151,48 +162,70 @@ def regular_select(pieces, patern, iteration_nbr):
 # ---------------- EXECUTION ----------------
 
 #startup
+win = Window(f"Grozzle [{VERSION}]", STARTUP_WIDTH, STARTUP_HEIGHT, '#000000')
 startup(win)
-win.stop()
+win.resize(GAME_WIDTH, GAME_HEIGHT)
 
 
 
-#generate pieces & patern
-pieces = []
-for p in range(PIECES_NBR):
-	pieces.append( Piece() )
+#generate puzzle
+pz = Puzzle(
+	PUZZLE_IMAGE_PATH,
+	PUZZLE_ROWS,
+	PUZZLE_COLUMNS
+)
 
+
+
+#patern
+print("PATERN :")
 patern = Piece(
 	SIDE_INNER,
 	SIDE_OUTER,
 	SIDE_UNDEFINED,
-	SIDE_UNDEFINED
+	SIDE_UNDEFINED,
+	PhotoImage(width=pz.pieceWidth, height=pz.pieceHeight)
 )
+patern.print()
 
 
 
 #select descriptions that matches the patern
+all_pieces = []
+for col in pz.pieces:
+	all_pieces += col
 selection = regular_select(
-	pieces,
+	all_pieces,
 	patern,
 	ITERATION_NBR
 )
-
-
-
-#display
-print("PIECES : [")
-for p in range(PIECES_NBR):
-	print(str(p)+" : ")
-	pieces[p].print()
-	print(" vs ")
-	patern.print()
-print("]\n")
-
-print("PATERN :")
-patern.print()
-
-print("RESULT : {")
+print("RESULT :")
 for s in range(len(selection)):
-	if (selection[s] > 0):
-		print("Piece "+str(printOnNdec(s,3))+" : "+str(printOnNbits(s,6))+" -> "+str(selection[s])+" : "+ printOn16b(pieces[s].desc) + " vs " + printOn16b(patern.desc))
-print("}")
+	print(
+		"Piece "    + str(printOnNdec(s,3))  +
+		" (bindex " + str(printOnNbits(s,6)) +
+		") -> "     + str(selection[s])      +
+		" times : " + printOn16b(all_pieces[s].desc) + " vs " + printOn16b(patern.desc)
+	)
+
+
+
+#main loop
+while True:
+
+	#background
+	win.rect(
+		0,         0,
+		win.width, win.height,
+		"#550055"
+	)
+
+	#show puzzle
+	pz.show(win, win.width_2, win.height_2)
+
+	#show patern piece
+	patern.show(win, win.width_2 - patern.width, 15*win.height/16)
+
+	#refresh screen
+	win.show()
+	sleep(FRAME_RATE)

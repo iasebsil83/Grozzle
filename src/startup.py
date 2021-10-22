@@ -11,28 +11,34 @@ import os, sys
 from time import sleep
 
 #PhotoImage
+from tkinter import Canvas
 from tkinter import PhotoImage
 
-#sources
-sys.path.append( os.getcwd() )
-from src.rgba import *
+
+
+
+
+
+# ---------------- DECLARATIONS ----------------
+
+#dimensions
+STARTUP_WIDTH  = 1080
+STARTUP_HEIGHT = 640
 
 
 
 
 
 
-# ---------------- GROVER ----------------
+# ---------------- EXECUTION ----------------
 
-#circuit
-def startup(w):
+#sequence
+def startup(win):
 
 	#show startup image
-	#startup_img = RGBA("sprites/rgba/QuantumNeon_1080x640.rgba", 1080,640)
-	#startup_img.show(w, w.width_2, w.height_2)
-	startup_img = PhotoImage(file="sprites/png/QuantumNeon.png")
-	w.display.create_image(w.width_2, w.height_2, image=startup_img)
-	w.show()
+	startup_img = PhotoImage(file="sprites/QuantumNeon.png")
+	win.display.create_image(win.width_2, win.height_2, image=startup_img)
+	win.show()
 
 	#delay
-	sleep(0.5)
+	sleep(1)

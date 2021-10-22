@@ -7,9 +7,6 @@
 #system
 import os, sys
 
-#random
-import random
-
 #sources
 sys.path.append( os.getcwd() )
 from src.binutils import *
@@ -122,13 +119,13 @@ def getPieceChar(side, type):
 class Piece:
 
 	#constructor
-	def __init__(self, up=None, down=None, left=None, right=None):
+	def __init__(self, up,down,left,right, image):
 
 		#set sides
-		self.up    = up    if (up    is not None) else SIDE_TYPES[random.randint(0,2)]
-		self.down  = down  if (down  is not None) else SIDE_TYPES[random.randint(0,2)]
-		self.left  = left  if (left  is not None) else SIDE_TYPES[random.randint(0,2)]
-		self.right = right if (right is not None) else SIDE_TYPES[random.randint(0,2)]
+		self.up    = up
+		self.down  = down
+		self.left  = left
+		self.right = right
 
 		#set description
 		self.desc = sides_to_description(
@@ -138,8 +135,20 @@ class Piece:
 			self.right
 		)
 
+		#set image
+		self.image  = image
+		self.width  = image.width()
+		self.height = image.height()
+
 	#display
 	def print(self):
 		print("    ." + getPieceChar(SIDE_UP,   self.up  ) + ".")
 		print("    "  + getPieceChar(SIDE_LEFT, self.left) + " " + getPieceChar(SIDE_RIGHT, self.right) + " (" + printOn16b(self.desc) + ")")
 		print("    '" + getPieceChar(SIDE_DOWN, self.down))
+
+	def show(self, win, x,y):
+		win.display.create_image(
+			x + self.width/2,
+			y + self.height/2,
+			image=self.image
+		)

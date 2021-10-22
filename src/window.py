@@ -5,7 +5,7 @@
 # ---------------- UTILS ----------------
 
 #toolkit interface
-import tkinter
+import tkinter as tk
 
 
 
@@ -22,13 +22,14 @@ class Window:
 		self.height   = height
 		self.width_2  = int(width/2)
 		self.height_2 = int(height/2)
+		self.bg_color = bg_color
 
 		#create window
-		self.win = tkinter.Tk()
+		self.win = tk.Tk()
 		self.win.title(title)
 
 		#create display
-		self.display = tkinter.Canvas(
+		self.display = tk.Canvas(
 			self.win,
 			width=width,
 			height=height,
@@ -45,24 +46,51 @@ class Window:
 	def stop(self):
 		self.win.destroy()
 
+
+
 	#draw
 	def point(self, x,y, color):
 		self.display.create_line(x,y, x,y, fill=color)
 
-	def rect(x1,y1, x2,y2, color, stroke=None):
+	def rect(self, x1,y1, x2,y2, color, stroke=None):
 		if stroke is None:
 			stroke = color
 		self.display.create_rectangle(x1,y1, x2,y2, fill=color,outline=stroke)
 
-	def circle(x,y, radius, color, stroke=None):
+	def circle(self, x1,y1, x2,y2, color, stroke=None):
 		if stroke is None:
 			stroke = color
-		self.display.oval(x,y, radius, radius, fill=color, outline=stroke)
+		self.display.oval(
+			x1, y1,
+			x2, x2,
+			fill=color, outline=stroke
+		)
+
+
+
+	#resize
+	def resize(self, newWidth, newHeight):
+		self.width    = newWidth
+		self.height   = newHeight
+		self.width_2  = int(self.width/2)
+		self.height_2 = int(self.height/2)
+
+		#create new window
+		self.display.destroy()
+		self.display = tk.Canvas(
+			self.win,
+			width=self.width,
+			height=self.height,
+			background=self.bg_color
+		)
+		self.display.pack()
+
+
 
 	#display
 	def show(self):
 		self.display.update()
-		self.display.delete(tkinter.ALL)
+		self.display.delete(tk.ALL)
 
 '''
 	#get text
